@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 
 import java.util.List;
 
@@ -25,15 +26,15 @@ public class F1MessageListener extends ListenerAdapter {
     }
 
     private String getNameByUser(User user) {
-        List<List<Object>> discordIDSGrid = F1Bot.getSheetAccess().getDiscordIDsGrid();
+        JSONArray discordIDS = F1Bot.getConfig().getJSONArray("discordIDS");
         String userId = user.getId();
         final String[] name = {null};
 
-        discordIDSGrid.forEach(row -> {
-            if (userId.equals(row.get(0))) {
-                name[0] = (String) row.get(1);
+        for (int i = 0; i < discordIDS.length(); i++) {
+            if (userId.equals(discordIDS.getJSONObject(i).getString("id"))) {
+                name[0] = discordIDS.getJSONObject(i).getString("name");
             }
-        });
+        }
 
         return name[0].toLowerCase();
     }
@@ -53,12 +54,15 @@ public class F1MessageListener extends ListenerAdapter {
                     System.out.println(nombre);
                 }
                 List<List<Object>> pilotGrid = F1Bot.getSheetAccess().getPilotGrid();
+                List<List<Object>> pilotScores = F1Bot.getSheetAccess().getPilotScores();
                 boolean found = false;
 
-                for (List<Object> row : pilotGrid) {
+                for (int i = 0; i < pilotGrid.size(); i++) {
+                    List<Object> row = pilotGrid.get(i);
+
                     if (((String) row.get(0)).toLowerCase().contains(nombre) && !found) {
                         found = true;
-                        int puntos = calculatePoints(row);
+                        int puntos = calculatePoints(pilotScores.get(i));
 
                         message.reply(row.get(0) + " tiene " + puntos + " puntos.").queue();
                     }
@@ -86,11 +90,12 @@ public class F1MessageListener extends ListenerAdapter {
             }
         } else if ("pilotos".equals(args[0])) {
             List<List<Object>> pilotGrid = F1Bot.getSheetAccess().getPilotGrid();
+            List<List<Object>> pilotScores = F1Bot.getSheetAccess().getPilotScores();
             StringBuilder description = new StringBuilder();
 
             for (int i = 0; i < pilotGrid.size(); i++) {
                 List<Object> row = pilotGrid.get(i);
-                int puntos = calculatePoints(row);
+                int puntos = calculatePoints(pilotScores.get(i));
                 description.append(i + 1).append(". ").append(row.get(0)).append(" (").append(puntos).append(" puntos)\n");
             }
 
@@ -121,26 +126,18 @@ public class F1MessageListener extends ListenerAdapter {
                 nombre = getNameByUser(message.getAuthor());
             }
             List<List<Object>> pilotGrid = F1Bot.getSheetAccess().getPilotGrid();
-            List<List<Object>> gpsGrid = F1Bot.getSheetAccess().getGPsGrid();
+            List<List<Object>> pilotScores = F1Bot.getSheetAccess().getPilotScores();
             boolean found = false;
 
-            for (List<Object> row : pilotGrid) {
+            for (int i = 0; i < pilotGrid.size(); i++) {
+                List<Object> row = pilotGrid.get(i);
+
                 if (((String) row.get(0)).toLowerCase().contains(nombre) && !found) {
                     found = true;
-                    int puntos = calculatePoints(row);
+                    int puntos = calculatePoints(pilotScores.get(i));
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setTitle("Resultados de " + row.get(0) + " (" + puntos + " puntos)");
-                    for (int i = 0; i < gpsGrid.size(); i++) {
-                        List<Object> gpRow = gpsGrid.get(i);
-
-                        String puntosGP = (String) row.get(i + 1);
-                        if (puntosGP.equals("")) {
-                            puntosGP = "0";
-                        }
-
-                        embedBuilder.addField(gpRow.get(0) + ". " + gpRow.get(1), puntosGP + " puntos", true);
-                    }
                     message.replyEmbeds(embedBuilder.build()).queue();
                 }
             }

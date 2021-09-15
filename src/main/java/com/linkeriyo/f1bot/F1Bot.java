@@ -25,7 +25,7 @@ public class F1Bot {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, GeneralSecurityException {
-        config = new JSONObject(readFile("files/config.json"))
+        config = new JSONObject(readFile("files/config.json", StandardCharsets.UTF_8));
 
         sheetAccess = new SheetAccess();
         jda = JDABuilder.createDefault(config.getString("token"))
