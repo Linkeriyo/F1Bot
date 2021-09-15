@@ -1,0 +1,16 @@
+{
+    "token": "",
+    "spreadsheetRanges": {
+        "pilotsDiscordIDS": "'DiscordIDS'!A2:B17",
+        "pilotsStats": "'Estadisticas de pilotos y equipos'!A3:I19",
+        "teamsStats": "'Estadisticas de pilotos y equipos'!J3:O13",
+        "firstEditionRanges": {
+            "pilotsGrid": "'1º Edicion'!B4:T19",
+            "teamsGrid": "'1º Edicion'!E25:K32"
+        },
+        "secondEditionRanges": {
+            "pilotsGrid": "'2º Edicion'!B3:X16",
+            "teamsGrid": "'2º Edicion'!B23:H32"
+        }
+    }
+}
